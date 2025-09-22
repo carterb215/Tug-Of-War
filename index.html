@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tug of War - Integer Operations</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
+    #rope-container { position: relative; width: 80%; height: 60px; margin: 30px auto; background: #f0f0f0; border: 2px solid #333; border-radius: 30px; }
+    #marker { position: absolute; top: 5px; left: 50%; transform: translateX(-50%); width: 50px; height: 50px; background: red; border-radius: 50%; transition: left 0.5s; }
+    .team { display: inline-block; width: 40%; vertical-align: top; margin: 20px; }
+    .question { font-size: 20px; margin: 10px; }
+    input { font-size: 16px; padding: 5px; margin: 5px; width: 80px; }
+    button { font-size: 16px; padding: 5px 10px; margin: 5px; }
+    h1 { color: #444; }
+    .history { margin-top: 20px; font-size: 14px; color: #666; }
+  </style>
+</head>
+<body>
+  <h1>⚔️ Tug of War – Integer Operations ⚔️</h1>
+
+  <div id="rope-container">
+    <div id="marker"></div>
+  </div>
+
+  <div class="team" id="teamA">
+    <h2>Team A</h2>
+    <div class="question" id="qA"></div>
+    <input type="number" id="ansA" />
+    <button onclick="game.checkAnswer('A')">Submit</button>
+  </div>
+
+  <div class="team" id="teamB">
+    <h2>Team B</h2>
+    <div class="question" id="qB"></div>
+    <input type="number" id="ansB" />
+    <button onclick="game.checkAnswer('B')">Submit</button>
+  </div>
+
+  <div class="history" id="history"></div>
+
+  <script>
+    class Game {
+      constructor() {
+        this.markerPercent = 50; 
+        this.currentProblems = {A:null, B:null};
+        this.qA = document.getElementById("qA");
+        this.qB = document.getElementById("qB");
+        this.marker = document.getElementById("marker");
+        this.history = document.getElementById("history");
+
+        this.genProblem('A');
+        this.genProblem('B');
+      }
+
+      randomInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+
+      genProblem(team) {
+        let ops = ['+','-','×','÷'];
+        let op = ops[this.randomInt(0,ops.length-1)];
+        let a = this.randomInt(-12,12);
+        let b = this.randomInt(-12,12);
+        if(op==='÷'){
+          while(b===0){ b=this.randomInt(-12,12);}
+          a = a*b; // ensures divisible
+        }
+        let expr=`${a} ${op} ${b}`;
+        let ans;
+        switch(op){
+          case '+': ans=a+b; break;
+          case '-': ans=a-b; break;
+          case '×': ans=a*b; break;
+          case '÷': ans=a/b; break;
+        }
+        this.currentProblems[team] = ans;
+        if(team==='A') this.qA.innerText=expr;
+        else this.qB.innerText=expr;
+      }
+
+      checkAnswer(team){
+        let input=document.getElementById("ans"+team);
+        let val=parseFloat(input.value);
+        if(val===this.currentProblems[team]){
+          this.addHistory(`✅ Team ${team} correct: ${val}`);
+          this.moveMarker(team);
+        } else {
+          this.addHistory(`❌ Team ${team} incorrect: ${val}`);
+        }
+        input.value="";
+        this.genProblem(team);
+      }
+
+      moveMarker(team){
+        if(team==='A') this.markerPercent-=5;
+        else this.markerPercent+=5;
+        if(this.markerPercent<0) this.markerPercent=0;
+        if(this.markerPercent>100) this.markerPercent=100;
+        this.updateMarker();
+      }
+
+      updateMarker(){
+        this.marker.style.left=this.markerPercent+"%";
+      }
+
+      addHistory(msg){
+        let p=document.createElement("div");
+        p.textContent=msg;
+        this.history.prepend(p);
+      }
+    }
+
+    const game=new Game();
+  </script>
+</body>
+</html>
